@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\NtbEvent.Application\NtbEvent.Application.csproj" />
+    <ProjectReference Include="..\NtbEvent.Domain\NtbEvent.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Dapper" Version="2.1.35" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.12.1" />
+    <PackageReference Include="Npgsql" Version="8.0.6" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.11" />
+    <!-- Fully-managed QR generation (no System.Drawing / native deps) -->
+    <PackageReference Include="QRCoder" Version="1.6.0" />
+    <!-- Fully-managed .xlsx generation for admin attendee-list exports -->
+    <PackageReference Include="ClosedXML" Version="0.104.2" />
+    <!-- SMTP client with full implicit-TLS (port 465) support, unlike System.Net.Mail -->
+    <PackageReference Include="MailKit" Version="4.9.0" />
+    <!-- Outbound mail over HTTPS — the VPS's hosting provider blocks outbound SMTP ports -->
+    <PackageReference Include="SendGrid" Version="9.29.3" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+</Project>

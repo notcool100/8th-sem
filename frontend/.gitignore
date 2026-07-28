@@ -1,0 +1,14 @@
+node_modules/
+.DS_Store
+.env
+.env.*
+!.env.example
+
+# SvelteKit
+.svelte-kit/
+build/
+package/
+
+# Vite
+dist/
+*.local

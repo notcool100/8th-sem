@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/NtbEvent.Api/NtbEvent.Api.csproj" />
+    <Project Path="src/NtbEvent.Application/NtbEvent.Application.csproj" />
+    <Project Path="src/NtbEvent.Domain/NtbEvent.Domain.csproj" />
+    <Project Path="src/NtbEvent.Infrastructure/NtbEvent.Infrastructure.csproj" />
+  </Folder>
+</Solution>

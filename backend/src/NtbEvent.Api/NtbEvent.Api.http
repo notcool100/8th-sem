@@ -1,0 +1,52 @@
+@NtbEvent.Api_HostAddress = http://localhost:5283
+
+GET {{NtbEvent.Api_HostAddress}}/api/events/public
+Accept: application/json
+
+###
+
+GET {{NtbEvent.Api_HostAddress}}/api/events?includeDrafts=true
+Accept: application/json
+
+###
+
+POST {{NtbEvent.Api_HostAddress}}/api/events
+Content-Type: application/json
+
+{
+  "title": "Everest Marathon",
+  "summary": "High-altitude sports tourism flagship event.",
+  "longDescription": "A national sports tourism event combining endurance racing, media exposure, and destination branding.",
+  "category": "Festival",
+  "type": "event",
+  "status": "published",
+  "date_ad": "2026-06-01",
+  "end_date_ad": "2026-06-03",
+  "color": "#0f766e",
+  "location": "Namche Bazaar",
+  "region": "Koshi",
+  "address": "Solukhumbu, Nepal",
+  "rating": 4.7,
+  "reviewsLabel": "540",
+  "price": 0,
+  "image": [
+    "https://admin.ntb.gov.np/image-cache/Everest_mp_trekker_(3)-1624814609.jpg?p=1920&s=303e3b2264fd091bea2fba2a68e9a6bf"
+  ],
+  "mapImage": "https://staticmap.openstreetmap.de/staticmap.php?center=27.9852,86.9226&zoom=10&size=1200x500&markers=27.9852,86.9226,red-pushpin",
+  "organizer": "Nepal Tourism Board (NTB)",
+  "organizerSubtitle": "Official Nepal government tourism authority",
+  "organizerVerified": true,
+  "highlights": [
+    {
+      "icon": "fi fi-rr-running",
+      "title": "Trail Stages",
+      "description": "Multi-stage route through high-altitude trails.",
+      "tone": "green"
+    }
+  ],
+  "featured": true,
+  "readTime": "4 min read",
+  "tags": ["Sports", "Adventure", "Tourism"]
+}
+
+###
