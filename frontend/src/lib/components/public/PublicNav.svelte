@@ -82,12 +82,12 @@
         </button>
         {#if showSearch}
           <div class="search-dropdown">
-            <label class="search-box" aria-label="Search">
+            <form class="search-box" action="/" method="GET" aria-label="Search">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
               </svg>
-              <input type="text" placeholder={$t('searchPlaceholder')} autofocus />
-            </label>
+              <input type="text" name="search" placeholder={$t('searchPlaceholder')} autofocus />
+            </form>
           </div>
         {/if}
       </div>
@@ -156,12 +156,12 @@
         {/each}
       </ul>
       <div class="mobile-bottom">
-        <label class="search-box mobile-search">
+        <form class="search-box mobile-search" action="/" method="GET">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
           </svg>
-          <input type="text" placeholder={$t('searchPlaceholder')} />
-        </label>
+          <input type="text" name="search" placeholder={$t('searchPlaceholder')} />
+        </form>
         <div class="mobile-langs">
           {#each LANGUAGES as lang}
             <button

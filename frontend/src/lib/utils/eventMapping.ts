@@ -57,6 +57,7 @@ export function mapEventDtoToPublicEvent(event: EventDto): PublicEvent {
 		organizerImageUrl: event.organizerImageUrl || undefined,
 		highlights: (event.highlights || []).map(mapHighlight),
 		featured: event.featured,
+		popularityScore: event.popularityScore ?? 0,
 		readTime: event.readTime || undefined,
 		requiresRegistration: event.requiresRegistration,
 		requiresInvitation: event.requiresInvitation

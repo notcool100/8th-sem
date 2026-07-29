@@ -995,7 +995,9 @@
   ]);
 
   const featuredEvents = $derived(
-    periodFilteredEvents.filter((e) => e.featured),
+    periodFilteredEvents
+      .filter((e) => e.featured)
+      .sort((a, b) => (b.popularityScore ?? 0) - (a.popularityScore ?? 0)),
   );
 
   const upcomingEventsAll = $derived.by(() => {
@@ -1496,6 +1498,7 @@
   event={selectedEvent}
   {categoryColorMap}
   onClose={closeEventDetails}
+  onSelectEvent={openEventDetails}
 />
 
 <!-- Mobile filter sheet -->

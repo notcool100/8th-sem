@@ -380,6 +380,38 @@
 			.filter(Boolean);
 	}
 
+	let suggestingTags = $state(false);
+	let tagSuggestError = $state("");
+
+	async function suggestTagsForEvent() {
+		tagSuggestError = "";
+		suggestingTags = true;
+		try {
+			const res = await fetch("/api/events/suggest-tags", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ title: values.title, description: values.longDescription })
+			});
+			if (!res.ok) {
+				tagSuggestError = "Couldn't fetch tag suggestions.";
+				return;
+			}
+			const suggestions: { tag: string }[] = await res.json();
+			const existing = parseList(values.tags);
+			const merged = [...existing];
+			for (const { tag } of suggestions) {
+				if (!merged.some((t) => t.toLowerCase() === tag.toLowerCase())) {
+					merged.push(tag);
+				}
+			}
+			values.tags = merged.join("\n");
+		} catch {
+			tagSuggestError = "Couldn't fetch tag suggestions.";
+		} finally {
+			suggestingTags = false;
+		}
+	}
+
 	function parseNumber(value: string, fallback = 0): number {
 		const numeric = Number(value);
 		return Number.isFinite(numeric) ? numeric : fallback;
@@ -667,6 +699,30 @@
 							<span class="approval-hint">
 								<i class="fi fi-rr-info"></i> This event will be sent to an approver before going live.
 							</span>
+						{/if}
+					</label>
+				</div>
+
+				<div class="field-grid">
+					<label>
+						<span>Tags</span>
+						<textarea
+							name="tags"
+							bind:value={values.tags}
+							rows="2"
+							placeholder="One tag per line, or comma-separated"
+						></textarea>
+						<button
+							type="button"
+							class="suggest-tags-btn"
+							onclick={suggestTagsForEvent}
+							disabled={suggestingTags || (!values.title && !values.longDescription)}
+						>
+							<i class="fi fi-rr-sparkles"></i>
+							{suggestingTags ? "Suggesting…" : "Suggest tags"}
+						</button>
+						{#if tagSuggestError}
+							<span class="field-error">{tagSuggestError}</span>
 						{/if}
 					</label>
 				</div>
@@ -1712,6 +1768,32 @@
 		font-weight: 700;
 		font-size: 0.82rem;
 		color: #24384f;
+	}
+
+	.suggest-tags-btn {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		margin-top: 6px;
+		padding: 8px 14px;
+		background: #f8ce1c;
+		color: #263038;
+		border: none;
+		border-radius: 8px;
+		cursor: pointer;
+		font-weight: 600;
+		font-size: 13px;
+		width: fit-content;
+		transition: background-color 0.2s;
+	}
+
+	.suggest-tags-btn:hover:not(:disabled) {
+		background: #e6b910;
+	}
+
+	.suggest-tags-btn:disabled {
+		opacity: 0.6;
+		cursor: not-allowed;
 	}
 
 	.upload-trigger-btn {

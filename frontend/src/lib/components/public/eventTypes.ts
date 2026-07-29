@@ -38,6 +38,8 @@ export interface PublicEvent extends CalendarEvent {
   organizerImageUrl?: string;
   highlights: EventHighlight[];
   featured?: boolean;
+  /** 0-1 weighted popularity score computed relative to the returned event set. */
+  popularityScore?: number;
   readTime?: string;
   requiresRegistration?: boolean;
   requiresInvitation?: boolean;

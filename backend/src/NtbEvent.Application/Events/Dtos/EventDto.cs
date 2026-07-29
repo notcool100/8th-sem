@@ -80,6 +80,9 @@ public sealed class EventDto
 
     public bool Featured { get; set; }
 
+    /// <summary>0-1 weighted popularity score computed relative to the returned event set. See <see cref="NtbEvent.Application.Contracts.Services.IPopularityScoreService"/>.</summary>
+    public decimal PopularityScore { get; set; }
+
     public string ReadTime { get; set; } = string.Empty;
 
     public bool RequiresRegistration { get; set; }

@@ -13,10 +13,12 @@ namespace NtbEvent.Application.Services;
 public sealed class EventService : IEventService
 {
     private readonly IEventRepository _eventRepository;
+    private readonly IPopularityScoreService _popularityScoreService;
 
-    public EventService(IEventRepository eventRepository)
+    public EventService(IEventRepository eventRepository, IPopularityScoreService popularityScoreService)
     {
         _eventRepository = eventRepository;
+        _popularityScoreService = popularityScoreService;
     }
 
     public async Task<EventDto> CreateEventAsync(
@@ -48,7 +50,15 @@ public sealed class EventService : IEventService
         CancellationToken cancellationToken = default)
     {
         var events = await _eventRepository.GetAsync(filter, cancellationToken);
-        return events.Select(Map).ToList();
+        var dtos = events.Select(Map).ToList();
+
+        if (string.Equals(filter.SortBy?.Trim(), "popularity", StringComparison.OrdinalIgnoreCase))
+        {
+            return _popularityScoreService.RankByPopularity(dtos);
+        }
+
+        _popularityScoreService.ScoreAll(dtos);
+        return dtos;
     }
 
     public async Task<PagedResult<EventDto>> GetPagedEventsAsync(
@@ -56,9 +66,12 @@ public sealed class EventService : IEventService
         CancellationToken cancellationToken = default)
     {
         var (items, totalCount) = await _eventRepository.GetPagedAsync(filter, cancellationToken);
+        var dtos = items.Select(Map).ToList();
+        _popularityScoreService.ScoreAll(dtos);
+
         return new PagedResult<EventDto>
         {
-            Items = items.Select(Map).ToList(),
+            Items = dtos,
             TotalCount = totalCount,
             Page = Math.Max(1, filter.Page),
             PageSize = Math.Clamp(filter.PageSize, 1, 100)

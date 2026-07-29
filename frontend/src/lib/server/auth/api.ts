@@ -2,7 +2,7 @@ import { env } from "$env/dynamic/private";
 import type { ApprovalRequest, AuthSessionPayload, ManagedUser, NavItem, SessionUser, UserRole, ApiResponse } from "$lib/types/auth";
 import type { CreateCategoryPayload, CategoryResponse } from "$lib/types/categories";
 import type { EmailTemplateDto, EmailTemplateType, UpdateEmailTemplatePayload } from "$lib/types/email-templates";
-import type { CreateEventPayload, EventDto } from "$lib/types/events";
+import type { CreateEventPayload, EventDto, SuggestedTagDto } from "$lib/types/events";
 import type { CreateFestivalPayload, FestivalDto } from "$lib/types/festivals";
 import type { InvitationDto, InviteGuestPayload, ScanResultDto } from "$lib/types/invitations";
 import type { EventRegistrationDto, RegisterGuestPayload } from "$lib/types/registrations";
@@ -210,6 +210,32 @@ export async function getPublicEventBySlug(slug: string): Promise<EventDto> {
 	return requestJson<EventDto>(`/api/events/public/by-slug/${encodeURIComponent(slug)}`, {
 		method: "GET",
 		headers: buildHeaders()
+	});
+}
+
+export async function getRecommendations(eventId: number, take = 5): Promise<EventDto[]> {
+	return requestJson<EventDto[]>(`/api/events/${eventId}/recommendations?take=${take}`, {
+		method: "GET",
+		headers: buildHeaders()
+	});
+}
+
+export async function searchEvents(query: string): Promise<EventDto[]> {
+	return requestJson<EventDto[]>(`/api/events/search?q=${encodeURIComponent(query)}`, {
+		method: "GET",
+		headers: buildHeaders()
+	});
+}
+
+export async function suggestTags(
+	accessToken: string,
+	title: string,
+	description: string
+): Promise<SuggestedTagDto[]> {
+	return requestJson<SuggestedTagDto[]>("/api/events/suggest-tags", {
+		method: "POST",
+		headers: buildHeaders(undefined, accessToken),
+		body: JSON.stringify({ title, description })
 	});
 }
 

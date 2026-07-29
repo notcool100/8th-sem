@@ -1,9 +1,11 @@
 import type { PageServerLoad } from "./$types";
-import { BackendApiError, getPublicEvents, getPublicFestivals, fetchCalendarFilterSettings, fetchCategories } from "$lib/server/auth/api";
+import { BackendApiError, getPublicEvents, getPublicFestivals, fetchCalendarFilterSettings, fetchCategories, searchEvents } from "$lib/server/auth/api";
 
-export const load: PageServerLoad = async () => {
+export const load: PageServerLoad = async ({ url }) => {
+	const search = url.searchParams.get("search")?.trim();
+
 	const [eventsResult, festivalsResult, filterSettingsResult, categoriesResult] = await Promise.allSettled([
-		getPublicEvents(),
+		search ? searchEvents(search) : getPublicEvents(),
 		getPublicFestivals(),
 		fetchCalendarFilterSettings(),
 		fetchCategories()
@@ -28,6 +30,7 @@ export const load: PageServerLoad = async () => {
 		festivals,
 		categories,
 		filterSettings,
+		search: search ?? "",
 		...(eventsError ? { error: eventsError } : {})
 	};
 };

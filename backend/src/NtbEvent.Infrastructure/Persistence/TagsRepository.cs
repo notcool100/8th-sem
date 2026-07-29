@@ -45,4 +45,22 @@ public sealed class TagsRepository : ITagsRepository
     {
         return await _dbContext.Tags.ToListAsync();
     }
+
+    public async Task<Dictionary<long, List<string>>> GetTagNamesByEventIdsAsync(IEnumerable<long> eventIds)
+    {
+        var ids = eventIds.Distinct().ToList();
+        if (ids.Count == 0)
+        {
+            return new Dictionary<long, List<string>>();
+        }
+
+        var rows = await _dbContext.EventTags
+            .Where(et => ids.Contains(et.EventId))
+            .Join(_dbContext.Tags, et => et.TagId, t => t.Id, (et, t) => new { et.EventId, t.Name })
+            .ToListAsync();
+
+        return rows
+            .GroupBy(r => r.EventId)
+            .ToDictionary(g => g.Key, g => g.Select(r => r.Name).ToList());
+    }
 }

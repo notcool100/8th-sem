@@ -14,6 +14,7 @@ public sealed class DatabaseInitializer
     private readonly IEventRepository _eventRepository;
     private readonly IUserRepository _userRepository;
     private readonly IPasswordService _passwordService;
+    private readonly ICategoryRepository _categoryRepository;
     private readonly SeedOptions _seedOptions;
 
     public DatabaseInitializer(
@@ -21,12 +22,14 @@ public sealed class DatabaseInitializer
         IEventRepository eventRepository,
         IUserRepository userRepository,
         IPasswordService passwordService,
+        ICategoryRepository categoryRepository,
         IOptions<SeedOptions> seedOptions)
     {
         _dbContext = dbContext;
         _eventRepository = eventRepository;
         _userRepository = userRepository;
         _passwordService = passwordService;
+        _categoryRepository = categoryRepository;
         _seedOptions = seedOptions.Value;
     }
 
@@ -36,7 +39,32 @@ public sealed class DatabaseInitializer
         await _dbContext.Database.MigrateAsync(cancellationToken);
         await SeedUsersAsync(cancellationToken);
         await SeedEventsAsync(cancellationToken);
+        await SeedCategoriesAsync(cancellationToken);
         await SeedNavItemsAsync(cancellationToken);
+    }
+
+    /// <summary>
+    /// Seeds a starter category set (each carrying its own tags via <c>ICategoryRepository.CreateAsync</c>,
+    /// which fans out to <c>Tags</c>/<c>CategoriesTags</c>). Without this, a fresh database has zero rows in
+    /// `Tags`, so the tag-suggestion service's Levenshtein fuzzy-match never has anything to match against.
+    /// </summary>
+    private async Task SeedCategoriesAsync(CancellationToken cancellationToken)
+    {
+        if (!_seedOptions.SeedDemoEvents)
+        {
+            return;
+        }
+
+        var existingCount = await _dbContext.Categories.CountAsync(cancellationToken);
+        if (existingCount > 0)
+        {
+            return;
+        }
+
+        foreach (var category in SeedData.CategorySeeds)
+        {
+            await _categoryRepository.CreateAsync(category);
+        }
     }
 
     private async Task SeedEventsAsync(CancellationToken cancellationToken)

@@ -7,6 +7,7 @@ using NtbEvent.Application.Contracts.Persistence;
 using NtbEvent.Application.Contracts.Services;
 using NtbEvent.Application.Events;
 using NtbEvent.Application.Events.Dtos;
+using NtbEvent.Application.Tags.Dtos;
 using NtbEvent.Domain.Entities;
 using NtbEvent.Domain.Enums;
 
@@ -20,17 +21,62 @@ public sealed class EventsController : ControllerBase
     private readonly IEventApprovalRepository _approvalRepository;
     private readonly IUserPermissionRepository _permissionRepository;
     private readonly INotificationService _notificationService;
+    private readonly IRecommendationService _recommendationService;
+    private readonly ISearchRankingService _searchRankingService;
+    private readonly ITagSuggestionService _tagSuggestionService;
 
     public EventsController(
         IEventService eventService,
         IEventApprovalRepository approvalRepository,
         IUserPermissionRepository permissionRepository,
-        INotificationService notificationService)
+        INotificationService notificationService,
+        IRecommendationService recommendationService,
+        ISearchRankingService searchRankingService,
+        ITagSuggestionService tagSuggestionService)
     {
         _eventService = eventService;
         _approvalRepository = approvalRepository;
         _permissionRepository = permissionRepository;
         _notificationService = notificationService;
+        _recommendationService = recommendationService;
+        _searchRankingService = searchRankingService;
+        _tagSuggestionService = tagSuggestionService;
+    }
+
+    [AllowAnonymous]
+    [HttpGet("{id:long}/recommendations")]
+    [ProducesResponseType(typeof(ApiResponse<IReadOnlyList<EventDto>>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<ApiResponse<IReadOnlyList<EventDto>>>> GetRecommendations(
+        long id,
+        [FromQuery] int take = 5,
+        CancellationToken cancellationToken = default)
+    {
+        var recommendations = await _recommendationService.GetRecommendationsAsync(
+            id, Math.Clamp(take, 1, 20), cancellationToken);
+        return Ok(ApiResponse<IReadOnlyList<EventDto>>.Success(recommendations));
+    }
+
+    [AllowAnonymous]
+    [HttpGet("search")]
+    [ProducesResponseType(typeof(ApiResponse<IReadOnlyList<EventDto>>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<ApiResponse<IReadOnlyList<EventDto>>>> SearchEvents(
+        [FromQuery] string? q,
+        CancellationToken cancellationToken = default)
+    {
+        var results = await _searchRankingService.SearchAsync(q, cancellationToken);
+        return Ok(ApiResponse<IReadOnlyList<EventDto>>.Success(results));
+    }
+
+    [Authorize(Roles = "SuperAdmin,Admin")]
+    [HttpPost("suggest-tags")]
+    [ProducesResponseType(typeof(ApiResponse<IReadOnlyList<SuggestedTagDto>>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<ApiResponse<IReadOnlyList<SuggestedTagDto>>>> SuggestTags(
+        [FromBody] SuggestTagsRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        var suggestions = await _tagSuggestionService.SuggestTagsAsync(
+            request.Title, request.Description, maxSuggestions: 8, cancellationToken);
+        return Ok(ApiResponse<IReadOnlyList<SuggestedTagDto>>.Success(suggestions));
     }
 
     [Authorize]

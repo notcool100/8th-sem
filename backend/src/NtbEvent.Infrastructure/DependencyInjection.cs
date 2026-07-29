@@ -51,6 +51,10 @@ public static class DependencyInjection
         services.AddScoped<ICategoryRepository, CategoriesRepository>();
         services.AddScoped<ITagsRepository, TagsRepository>();
         services.AddScoped<IEventService, EventService>();
+        services.AddScoped<IPopularityScoreService, PopularityScoreService>();
+        services.AddScoped<IRecommendationService, RecommendationService>();
+        services.AddScoped<ISearchRankingService, SearchRankingService>();
+        services.AddScoped<ITagSuggestionService, TagSuggestionService>();
         services.AddScoped<IFestivalService, FestivalService>();
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IUserService, UserService>();

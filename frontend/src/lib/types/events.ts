@@ -100,10 +100,18 @@ export type EventDto = {
 	organizerImageUrl?: string | null;
 	highlights: EventHighlightDto[];
 	featured: boolean;
+	/** 0-1 weighted popularity score computed relative to the returned event set. */
+	popularityScore: number;
 	readTime: string;
 	requiresRegistration: boolean;
 	requiresInvitation: boolean;
 	invitationEmailSubject: string | null;
 	invitationEmailBodyHtml: string | null;
 	selfRegistrationFields: string[];
+};
+
+export type SuggestedTagDto = {
+	tag: string;
+	isExistingTag: boolean;
+	score: number;
 };

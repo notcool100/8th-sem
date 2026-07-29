@@ -26,7 +26,7 @@ public sealed class EventFilter
 
     // ─── Sorting ───────────────────────────────────────────────────────────────
 
-    /// <summary>Column to sort by: "date" | "title" | "rating".</summary>
+    /// <summary>Column to sort by: "date" | "title" | "rating" | "popularity". "popularity" is computed in-memory (see <see cref="NtbEvent.Application.Contracts.Services.IPopularityScoreService"/>) and only applies to the non-paged <c>GetEventsAsync</c> path.</summary>
     public string SortBy { get; set; } = "date";
 
     /// <summary>Sort direction: "asc" | "desc".</summary>

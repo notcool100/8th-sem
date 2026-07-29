@@ -2,6 +2,8 @@
   import type { PublicEvent } from "$lib/components/public/eventTypes";
   import { NTB_LOGO_URL } from "$lib/constants/branding";
   import LocationPickerMap from "$lib/components/LocationPickerMap.svelte";
+  import { mapEventDtoToPublicEvent } from "$lib/utils/eventMapping";
+  import type { EventDto } from "$lib/types/events";
 
   function portal(node: HTMLElement, enabled: boolean) {
     if (!enabled) return {};
@@ -24,13 +26,49 @@
     categoryColorMap = {},
     onClose = () => {},
     inlinePreview = false,
+    onSelectEvent = null,
   } = $props<{
     open: boolean;
     event: PublicEvent | null;
     categoryColorMap?: Record<string, string>;
     onClose: () => void;
     inlinePreview?: boolean;
+    onSelectEvent?: ((event: PublicEvent) => void) | null;
   }>();
+
+  let recommendations = $state<PublicEvent[]>([]);
+  let loadingRecommendations = $state(false);
+
+  $effect(() => {
+    const currentId = event?.id;
+    const currentSource = event?.source;
+    if (!open || currentId == null || currentSource !== "event") {
+      recommendations = [];
+      return;
+    }
+
+    let cancelled = false;
+    loadingRecommendations = true;
+    fetch(`/api/events/${currentId}/recommendations`)
+      .then((res) => (res.ok ? res.json() : []))
+      .then((dtos: EventDto[]) => {
+        if (!cancelled) recommendations = (dtos || []).map(mapEventDtoToPublicEvent);
+      })
+      .catch(() => {
+        if (!cancelled) recommendations = [];
+      })
+      .finally(() => {
+        if (!cancelled) loadingRecommendations = false;
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  });
+
+  function selectRecommendation(recommendedEvent: PublicEvent) {
+    onSelectEvent?.(recommendedEvent);
+  }
 
   function categoryColor(name: string): string {
     return categoryColorMap[name.trim().toLowerCase()] ?? event?.color ?? "#f97316";
@@ -477,6 +515,28 @@
         </section>
         {/if}
 
+        {#if loadingRecommendations || recommendations.length > 0}
+        <section class="section-block related-events">
+          <h3><i class="fi fi-rr-sparkles"></i> You might also like</h3>
+          {#if loadingRecommendations}
+            <p class="related-loading">Finding similar events…</p>
+          {:else}
+            <div class="related-grid">
+              {#each recommendations as related (related.id)}
+                <button type="button" class="related-card" onclick={() => selectRecommendation(related)}>
+                  <img src={related.image[0]} alt={related.title} />
+                  <div class="related-card-body">
+                    <span class="related-card-category">{related.category}</span>
+                    <h4>{related.title}</h4>
+                    <p>{related.dateRangeLabel}</p>
+                  </div>
+                </button>
+              {/each}
+            </div>
+          {/if}
+        </section>
+        {/if}
+
         <footer class="actions">
           {#if event.requiresRegistration}
             <a href={event.slug ? `/register/${event.slug}` : '#'} class="action action-primary">
@@ -910,6 +970,61 @@
     font-size: 0.82rem;
     padding: 0.33rem 0.7rem;
     font-weight: 600;
+  }
+
+  .related-loading {
+    margin: 0.9rem 0 0;
+    color: #64748b;
+    font-size: 0.9rem;
+  }
+
+  .related-grid {
+    margin-top: 0.9rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 0.75rem;
+  }
+
+  .related-card {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #fff;
+    cursor: pointer;
+    padding: 0;
+    font: inherit;
+  }
+
+  .related-card img {
+    width: 100%;
+    height: 90px;
+    object-fit: cover;
+  }
+
+  .related-card-body {
+    padding: 0.6rem 0.7rem;
+  }
+
+  .related-card-category {
+    color: #c8102e;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  .related-card-body h4 {
+    margin: 0.2rem 0;
+    font-size: 0.9rem;
+    color: #1f2937;
+  }
+
+  .related-card-body p {
+    margin: 0;
+    color: #64748b;
+    font-size: 0.78rem;
   }
 
   .highlight-grid {
